@@ -43,6 +43,7 @@ import {
   updateOrgOutlet,
   updateOutletStock,
   uploadMenuItemImage,
+  resolveImageUrl,
 } from "../api/client";
 
 const FALLBACK_FOOD_IMG =
@@ -929,7 +930,7 @@ export default function OutletManagerDashboard() {
                 {/* Photo Thumbnail */}
                 <div className="relative h-44 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <img
-                    src={item.image_url || FALLBACK_FOOD_IMG}
+                    src={resolveImageUrl(item.image_url) || FALLBACK_FOOD_IMG}
                     alt={item.name}
                     className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
                     onError={(e) => {
@@ -1052,7 +1053,7 @@ export default function OutletManagerDashboard() {
               <div className="flex items-center gap-4">
                 <div className="relative h-24 w-32 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0">
                   <img
-                    src={editingItem.image_url || FALLBACK_FOOD_IMG}
+                    src={resolveImageUrl(editingItem.image_url) || FALLBACK_FOOD_IMG}
                     alt={editingItem.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {

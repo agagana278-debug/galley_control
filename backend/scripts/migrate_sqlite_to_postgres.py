@@ -19,6 +19,8 @@ TABLE_COPY_ORDER = [
     "outlets",
     "users",
     "user_sessions",
+    "password_reset_tokens",
+    "auth_rate_limits",
     "menu_items",
     "inventory_movements",
     "orders",
@@ -114,6 +116,21 @@ def migrate_sqlite_to_postgres(sqlite_path: str, pg_url: str) -> None:
                     ),
                     {"t": table_name},
                 )
+
+        if "alembic_version" in sq_tables:
+            alem_rows = sq.execute("SELECT version_num FROM alembic_version").fetchall()
+            if alem_rows:
+                ver = alem_rows[0][0]
+                conn.execute(
+                    text(
+                        "CREATE TABLE IF NOT EXISTS alembic_version ("
+                        "version_num VARCHAR(32) NOT NULL, "
+                        "CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num))"
+                    )
+                )
+                conn.execute(text("DELETE FROM alembic_version"))
+                conn.execute(text("INSERT INTO alembic_version (version_num) VALUES (:v)"), {"v": ver})
+                print(f"[ALEMBIC] Stamped alembic_version to '{ver}'.")
 
     sq.close()
     print("SQLite -> PostgreSQL migration completed cleanly.")

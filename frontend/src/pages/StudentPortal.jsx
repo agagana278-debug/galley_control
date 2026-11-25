@@ -30,6 +30,7 @@ import {
   fetchGroupOrders,
   fetchOrders,
   submitReview,
+  resolveImageUrl,
 } from "../api/client";
 import AiAssistantPanel from "../components/AiAssistantPanel";
 import { useAuth } from "../context/AuthContext";
@@ -530,7 +531,7 @@ export default function StudentPortal() {
                     {/* Food Photography Container */}
                     <div className="relative h-44 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                       <img
-                        src={item.image_url || FALLBACK_FOOD_IMG}
+                        src={resolveImageUrl(item.image_url) || FALLBACK_FOOD_IMG}
                         alt={item.name}
                         loading="lazy"
                         className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${

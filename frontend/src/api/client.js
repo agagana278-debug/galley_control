@@ -10,6 +10,14 @@ export function buildApiUrl(path) {
   return `${API_BASE}${path}`;
 }
 
+export function resolveImageUrl(url) {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+    return url;
+  }
+  return buildApiUrl(url.startsWith("/") ? url : `/${url}`);
+}
+
 export class ApiError extends Error {
   constructor(message, status, detail = null) {
     super(message);
