@@ -7,7 +7,15 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+ROOT_DIR = os.path.dirname(BASE_DIR)
+for env_file in [
+    os.path.join(ROOT_DIR, ".env.local"),
+    os.path.join(BASE_DIR, ".env.local"),
+    os.path.join(BASE_DIR, ".env"),
+    os.path.join(ROOT_DIR, ".env"),
+]:
+    if os.path.isfile(env_file):
+        load_dotenv(env_file, override=False)
 
 
 def _as_bool(raw: str | None, default: bool = False) -> bool:
@@ -38,6 +46,10 @@ class Settings:
 
     # Production PostgreSQL URL (e.g. postgresql+psycopg://user:pass@host:5432/db?sslmode=require)
     database_url: str = normalize_database_url(os.getenv("DATABASE_URL", ""))
+    # Unpooled/direct PostgreSQL URL for DDL/migrations (bypasses PgBouncer transaction mode)
+    database_url_unpooled: str = normalize_database_url(
+        os.getenv("DATABASE_URL_UNPOOLED", "")
+    )
     # Development SQLite fallback when DATABASE_URL is unset
     database_path: str = os.getenv(
         "DATABASE_PATH", os.path.join(BASE_DIR, "galley_control.db")
@@ -129,6 +141,13 @@ class Settings:
             )
         abs_path = os.path.abspath(self.database_path).replace("\\", "/")
         return f"sqlite:///{abs_path}"
+
+    def get_migration_database_url(self) -> str:
+        """Resolve direct/unpooled PostgreSQL URL for DDL/migrations (or fallback to database_url)."""
+        normalized_unpooled = normalize_database_url(self.database_url_unpooled)
+        if normalized_unpooled:
+            return normalized_unpooled
+        return self.get_database_url()
 
     def validate_production_safety(self) -> None:
         """Fail fast on insecure secrets or missing production DB settings."""

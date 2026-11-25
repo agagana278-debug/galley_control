@@ -138,9 +138,15 @@ def migrate_sqlite_to_postgres(sqlite_path: str, pg_url: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Migrate Galley Control SQLite DB to PostgreSQL")
-    parser.add_argument("--sqlite", required=True, help="Path to source galley_control.db")
-    parser.add_argument("--postgres-url", required=True, help="Target PostgreSQL DATABASE_URL")
+    parser.add_argument("--sqlite", default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "galley_control.db"), help="Path to source galley_control.db")
+    parser.add_argument(
+        "--postgres-url",
+        default=os.getenv("DATABASE_URL_UNPOOLED") or os.getenv("DATABASE_URL") or "",
+        help="Target PostgreSQL DATABASE_URL (defaults to DATABASE_URL_UNPOOLED or DATABASE_URL)",
+    )
     args = parser.parse_args()
+    if not args.postgres_url:
+        raise SystemExit("Error: Target PostgreSQL URL is missing. Set DATABASE_URL_UNPOOLED / DATABASE_URL or pass --postgres-url.")
     migrate_sqlite_to_postgres(args.sqlite, args.postgres_url)
 
 

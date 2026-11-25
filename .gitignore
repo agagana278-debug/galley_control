@@ -8,6 +8,8 @@ venv/
 *.db
 *.sqlite
 *.sqlite3
+*.backup
+*.bak
 
 # Environment secrets
 .env
